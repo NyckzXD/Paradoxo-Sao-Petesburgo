@@ -4,6 +4,18 @@
 const BRL = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const $ = id => document.getElementById(id);
 
+// Formatação compacta para evitar overflow em cards
+function BRLc(n) {
+  const abs = Math.abs(n);
+  let val, suffix;
+  if      (abs >= 1e12) { val = n / 1e12; suffix = ' TRI'; }
+  else if (abs >= 1e9)  { val = n / 1e9;  suffix = ' BI';  }
+  else if (abs >= 1e6)  { val = n / 1e6;  suffix = ' M';   }
+  else if (abs >= 1e3)  { val = n / 1e3;  suffix = ' mil'; }
+  else                  { return BRL(n); }
+  return 'R$\u00a0' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + suffix;
+}
+
 /* ============ tabs ============ */
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
@@ -159,13 +171,13 @@ function runSimulation() {
   const avg = totalPrize / N;
 
   // ---- cards ----
-  $('rCost').textContent = BRL(cost);
-  $('rWon').textContent = BRL(totalPrize);
+  $('rCost').textContent = BRLc(cost);
+  $('rWon').textContent = BRLc(totalPrize);
   const netEl = $('rNet');
-  netEl.textContent = (net >= 0 ? '+' : '') + BRL(net);
+  netEl.textContent = (net >= 0 ? '+' : '') + BRLc(Math.abs(net));
   netEl.style.color = net >= 0 ? 'var(--celadon)' : 'var(--rust)';
   $('rAvg').textContent = BRL(avg);
-  $('rMax').textContent = BRL(Math.pow(2, maxHeads)) + ` (${maxHeads} caras)`;
+  $('rMax').textContent = BRLc(Math.pow(2, maxHeads)) + ` (${maxHeads} caras)`;
   $('rProfit').textContent = (100 * profitable / N).toFixed(2) + '%';
 
   // ---- veredito ----
